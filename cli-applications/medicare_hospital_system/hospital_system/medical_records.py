@@ -113,6 +113,30 @@ def update_record(record_id: str, doctor_id: str, **fields):
         )
 
 
+def doctor_has_patient_relationship(doctor_id: str, patient_id: str) -> bool:
+    """Check if a doctor has an appointment or medical record with a patient."""
+    conn = db.get_connection()
+    row = conn.execute(
+        """SELECT 1 FROM appointments WHERE doctor_id = ? AND patient_id = ?
+           UNION
+           SELECT 1 FROM medical_records WHERE doctor_id = ? AND patient_id = ?""",
+        (doctor_id, patient_id, doctor_id, patient_id),
+    ).fetchone()
+    conn.close()
+    return row is not None
+
+
+def get_patient_history_for_doctor(patient_id: str, doctor_id: str):
+    """Retrieve patient medical history for a doctor only if the patient has an appointment or visit with that doctor."""
+    patient_id = patient_id.strip()
+    doctor_id = doctor_id.strip()
+
+    if not doctor_has_patient_relationship(doctor_id, patient_id):
+        raise ValueError(f"Access Denied: Patient {patient_id} does not have an appointment or visit with you (Doctor {doctor_id}).")
+
+    return get_patient_history(patient_id)
+
+
 def get_patient_history(patient_id: str):
     conn = db.get_connection()
     rows = conn.execute(

@@ -175,6 +175,30 @@ class TestMedicareHospitalSystem(unittest.TestCase):
         self.assertEqual(bill["total_amount"], 135.0)
         self.assertEqual(bill["balance"], 135.0)
 
+    def test_viewing_medical_history_of_unappointed_patient(self):
+        doc1_id = doctors.add_doctor("Dr. Alice", "Cardiology", "alice@test.com", "08011110001", consultation_fee=100)
+        doc2_id = doctors.add_doctor("Dr. Bob", "Dentistry", "bob@test.com", "08011110002", consultation_fee=150)
+        pat_id = patients.register_patient("Charlie Brown", "charlie@test.com", "08022220001", "1990-01-01", "Male", "Address", "O+")
+
+        # Doctor 1 creates a record for Charlie
+        rec_id, _, _, _ = medical_records.create_record(
+            patient_id=pat_id,
+            doctor_id=doc1_id,
+            diagnosis="Arrhythmia",
+            symptoms="Palpitations",
+            prescription="Beta-blocker",
+            notes="Rest recommended",
+        )
+
+        # Doctor 1 can view history for Charlie
+        history1 = medical_records.get_patient_history_for_doctor(pat_id, doc1_id)
+        self.assertEqual(len(history1), 1)
+        self.assertEqual(history1[0]["record_id"], rec_id)
+
+        # Doctor 2 (who has NO appointment or visit with Charlie) is denied access
+        with self.assertRaises(ValueError):
+            medical_records.get_patient_history_for_doctor(pat_id, doc2_id)
+
 
 if __name__ == "__main__":
     unittest.main()

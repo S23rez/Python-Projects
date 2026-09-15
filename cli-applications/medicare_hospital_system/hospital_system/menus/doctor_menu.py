@@ -33,15 +33,7 @@ def run(user):
                 )
                 ui.pause()
             elif choice == "2":
-                pid = ui.prompt("Patient ID")
-                if not patients.patient_exists(pid):
-                    ui.print_error(f"Patient {pid} not found.")
-                else:
-                    ui.print_table(
-                        medical_records.get_patient_history(pid),
-                        ["record_id", "date_of_visit", "diagnosis", "cause", "symptoms", "prescription", "avoid"],
-                    )
-                ui.pause()
+                _view_patient_medical_history(doctor_id)
             elif choice == "3":
                 _create_record(doctor_id)
             elif choice == "4":
@@ -60,7 +52,48 @@ def run(user):
             ui.print_error(str(e))
             ui.pause()
 
+def _view_patient_medical_history(doctor_id):
+    ui.print_header("VIEW PATIENT MEDICAL HISTORY")
+    print(" 1. Search patient by Keyword (Name / Email / Phone / ID)")
+    print(" 2. Enter Patient ID directly")
+    sub_choice = ui.prompt("Choose an option")
 
+    pid = None
+    if sub_choice == "1":
+        kw = ui.prompt("Enter search keyword")
+        results = patients.search_patients(kw)
+        if not results:
+            ui.print_error("No patients found matching that keyword.")
+            ui.pause()
+            return
+        ui.print_table(results, ["patient_id", "full_name", "email", "phone", "gender", "dob"])
+        pid = ui.prompt("Enter Patient ID to view medical history")
+    elif sub_choice == "2":
+        pid = ui.prompt("Patient ID")
+    else:
+        ui.print_error("Invalid option.")
+        ui.pause()
+        return
+
+    if not pid or not patients.patient_exists(pid):
+        ui.print_error(f"Patient '{pid}' not found.")
+        ui.pause()
+        return
+
+    patient = patients.get_patient(pid)
+    ui.print_header(f"MEDICAL HISTORY FOR {patient['full_name']} ({pid})")
+    try:
+        history = medical_records.get_patient_history_for_doctor(pid, doctor_id)
+        if not history:
+            print("  No medical records on file for this patient.")
+        else:
+            ui.print_table(
+                history,
+                ["record_id", "date_of_visit", "doctor_id", "diagnosis", "cause", "symptoms", "prescription", "avoid", "medical_fee", "notes"],
+            )
+    except ValueError as e:
+        ui.print_error(str(e))
+    ui.pause()
 def _create_record(doctor_id):
     ui.print_header("NEW MEDICAL RECORD")
     pid = ui.prompt("Patient ID")
