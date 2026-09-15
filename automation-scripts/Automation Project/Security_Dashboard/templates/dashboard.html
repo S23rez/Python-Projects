@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Network Security Dashboard</title>
+</head>
+<body style="font-family: Arial, sans-serif; margin: 40px; background-color: #f4f6f9;">
+
+    <h1>🛡️ Network Security Monitoring Dashboard</h1>
+    <p>Live automated log streaming feed:</p>
+
+    <ul style="list-style-type: none; padding: 0;">
+      <!-- THE LOOP: Cycles through every alert in our Python file -->
+            {% for alert in alerts %}
+
+        <!-- RULE 1: If it is CRITICAL, make it red -->
+        {% if alert.status == 'CRITICAL' %}
+          <li style="background-color: #fde8e8; border-left: 5px solid red; margin: 10px 0; padding: 15px; border-radius: 4px;">
+            <strong style="color: red;">[⚠️ {{ alert.status }}]</strong>
+            IP Address: <code>{{ alert.ip }}</code> — Event: {{ alert.message }}
+          </li>
+
+        <!-- RULE 2: Else If it is LOW, make it yellow -->
+        {% elif alert.status == 'LOW' %}
+          <li style="background-color: #fefcbf; border-left: 5px solid #ecc94b; margin: 10px 0; padding: 15px; border-radius: 4px;">
+            <strong style="color: #b7791f;">[🔔 {{ alert.status }}]</strong>
+            IP Address: <code>{{ alert.ip }}</code> — Event: {{ alert.message }}
+          </li>
+
+        <!-- RULE 3: For everything else (INFO), make it green -->
+        {% else %}
+          <li style="background-color: #eafaf1; border-left: 5px solid green; margin: 10px 0; padding: 15px; border-radius: 4px;">
+            <strong style="color: green;">[{{ alert.status }}]</strong>
+            IP Address: <code>{{ alert.ip }}</code> — Event: {{ alert.message }}
+          </li>
+        {% endif %}
+
+      {% endfor %}
+
+    </ul>
+
+</body>
+</html>
