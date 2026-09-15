@@ -1,12 +1,9 @@
 # Python environments and caches
 __pycache__/
 *.pyc
-*.pyo
 venv/
 env/
 .venv/
-
-# Secrets
 .env
 
 # OS Generated
