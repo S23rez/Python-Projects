@@ -1,0 +1,14 @@
+# SQLite local databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment & OS files
+.env
+.DS_Store
+Thumbs.db
